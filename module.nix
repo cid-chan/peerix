@@ -61,7 +61,7 @@ in
         User = cfg.user;
         Group = cfg.group;
 
-        PrivateMounts = true;
+        # PrivateMounts = true;
         # PrivateDevices = true;
         # PrivateTmp = true;
         # PrivateIPC = true;
@@ -90,20 +90,20 @@ in
         # ProtectControlGroups = true;
         # RestrictNamespaces = "";
 
-        NoNewPrivileges = true;
-        ReadOnlyPaths = lib.mkMerge [
-          ([
-            "/nix/var"
-            "/nix/store"
-          ])
+        # NoNewPrivileges = true;
+        # ReadOnlyPaths = lib.mkMerge [
+        #   ([
+        #     "/nix/var"
+        #     "/nix/store"
+        #   ])
 
-          (lib.mkIf (cfg.privateKeyFile != null) [
-            (toString cfg.privateKeyFile)
-          ])
-        ];
-        ExecPaths = [
-          "/nix/store"
-        ];
+        #   (lib.mkIf (cfg.privateKeyFile != null) [
+        #     (toString cfg.privateKeyFile)
+        #   ])
+        # ];
+        # ExecPaths = [
+        #   "/nix/store"
+        # ];
         Environment = lib.mkIf (cfg.privateKeyFile != null) [
           "NIX_SECRET_KEY_FILE=${toString cfg.privateKeyFile}"
         ];

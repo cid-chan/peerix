@@ -104,7 +104,9 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
             self.transport.sendto(b"".join([b"\x00", idx.to_bytes(4, "big"), hsh.encode("utf-8")]), (addr, self.local_port))
 
         try:
-            port, url, addr = await asyncio.wait_for(fut, 0.5)
+            # This must have a short timeout so it does not noticably slow down
+            # querying of other caches.
+            port, url, addr = await asyncio.wait_for(fut, 0.05)
         except asyncio.TimeoutError:
             print(f"No response for {hsh}")
             return None

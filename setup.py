@@ -1,21 +1,22 @@
 #setup.py:
-
+import os
 from distutils.core import setup
-from Cython.Build import cythonize
-from distutils.extension import Extension
 
-ext_modules = [
-    Extension(
-        name="peerix._nix",
-        sources=["peerix/_nix.pyx"],
-        language="c++",
-        extra_compile_args=["-std=c++17"],
-   )
-]
+DIR = os.path.dirname(__file__)
 
-ext_modules = cythonize(ext_modules)
+with open(os.path.join(DIR, "requirements.txt")) as f:
+    requirements = f.readlines()
+
+with open(os.path.join(DIR, "VERSION")) as f:
+    version = f.read().strip()
 
 setup(
     name="peerix",
-    ext_modules=ext_modules,
+    entry_points={
+        "console_scripts": [
+            'peerix = peerix.__main__:run'
+        ]
+    },
+    version=version,
+    requires=requirements
 )

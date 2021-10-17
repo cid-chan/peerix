@@ -1,6 +1,6 @@
 #setup.py:
 import os
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 DIR = os.path.dirname(__file__)
 
@@ -12,6 +12,7 @@ with open(os.path.join(DIR, "VERSION")) as f:
 
 setup(
     name="peerix",
+    packages=find_packages(),
     entry_points={
         "console_scripts": [
             'peerix = peerix.__main__:run'

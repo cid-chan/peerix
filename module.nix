@@ -88,7 +88,7 @@ in
         ProtectKernelModules = true;
         ProtectKernelLogs = true;
         ProtectControlGroups = true;
-        RestrictAddressFamilies = [ "AF_INET", "AF_UNIX" ];
+        RestrictAddressFamilies = [ "AF_INET" "AF_UNIX" ];
         RestrictNamespaces = "";
 
         NoNewPrivileges = true;

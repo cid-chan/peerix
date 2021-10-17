@@ -98,15 +98,15 @@ in
             "/nix/store"
           ])
 
-          (lib.mkIf (config.privateKeyFile != null) [
-            (toString config.privateKeyFile)
+          (lib.mkIf (cfg.privateKeyFile != null) [
+            (toString cfg.privateKeyFile)
           ]);
         ];
         ExecPaths = [
           "/nix/store"
         ];
-        Environment = lib.mkIf (config.privateKeyFile != null) [
-          "NIX_SECRET_KEY_FILE=${toString config.privateKeyFile}"
+        Environment = lib.mkIf (cfg.privateKeyFile != null) [
+          "NIX_SECRET_KEY_FILE=${toString cfg.privateKeyFile}"
         ];
       };
       script = ''
@@ -118,8 +118,8 @@ in
       binaryCaches = [
         "http://127.0.0.1:12304/"
       ];
-      binaryCachePublicKeys = lib.mkIf (config.publicKeyFile != null) [
-        (builtins.readFile config.publicKeyFile)
+      binaryCachePublicKeys = lib.mkIf (cfg.publicKeyFile != null) [
+        (builtins.readFile cfg.publicKeyFile)
       ];
     };
 

@@ -3,6 +3,7 @@ import typing as t
 import contextlib
 import subprocess
 import tempfile
+import logging
 import asyncio
 import shutil
 import base64
@@ -24,6 +25,9 @@ if nix is None:
 
 assert nix_serve is not None
 assert nix is not None
+
+
+logger = logging.getLogger("peerix.local")
 
 
 class LocalStore(Store):

@@ -1,6 +1,7 @@
 import typing as t
 
 import socket
+import logging
 import asyncio
 import ipaddress
 import contextlib
@@ -10,6 +11,10 @@ import aiohttp
 
 
 from peerix.store import NarInfo, Store
+
+
+logger = logging.getLogger("peerix.remote")
+
 
 
 def get_brdcasts():
@@ -56,7 +61,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
 
     def datagram_received(self, data: bytes, addr: t.Tuple[str, int]) -> None:
         if addr[0] in set(get_myself()):
-            print(f"Ignoring packet from {addr[0]}")
+            logger.debug(f"Ignoring packet from {addr[0]}")
             return
 
         # 0 => Response to a command of mine.
@@ -79,11 +84,13 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
 
     async def respond(self, data: bytes, addr: t.Tuple[str, int]) -> None:
         hsh = data[5:].decode("utf-8")
-        print(f"Got request from {addr[0]}:{addr[1]} for {hsh}")
+        logger.info(f"Got request from {addr[0]}:{addr[1]} for {hsh}")
         narinfo = await self.store.narinfo(hsh)
         if narinfo is None:
+            logger.debug(f"{hsh} not found")
             return
 
+        logger.debug(f"{hsh} was found.")
         self.transport.sendto(b"".join([
             b"\x01",
             data[1:5],
@@ -99,8 +106,9 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         self.idx = (idx := self.idx)+1
         self.waiters[idx] = fut
         fut.add_done_callback(lambda _: self.waiters.pop(idx, None))
-        print(f"Requesting {hsh} from direct local network.")
+        logging.info(f"Requesting {hsh} from direct local network.")
         for addr in set(get_brdcasts()):
+            logging.debug(f"Sending request for {hsh} to {addr}:{self.local_port}")
             self.transport.sendto(b"".join([b"\x00", idx.to_bytes(4, "big"), hsh.encode("utf-8")]), (addr, self.local_port))
 
         try:
@@ -108,10 +116,10 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
             # querying of other caches.
             port, url, addr = await asyncio.wait_for(fut, 0.05)
         except asyncio.TimeoutError:
-            print(f"No response for {hsh}")
+            logging.debug(f"No response for {hsh}")
             return None
 
-        print(f"{addr[0]}:{addr[1]} responded for {hsh} with http://{addr[0]}:{port}/{url}")
+        logging.info(f"{addr[0]}:{addr[1]} responded for {hsh} with http://{addr[0]}:{port}/{url}")
 
         async with self.session.get(f"http://{addr[0]}:{port}/{url}") as resp:
             if resp.status != 200:

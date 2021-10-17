@@ -1,4 +1,6 @@
+import logging
 import asyncio
+
 import uvloop
 from hypercorn import Config
 from hypercorn.asyncio import serve
@@ -7,6 +9,7 @@ from peerix.app import app
 
 
 def run():
+    logging.basicConfig(level=logging.DEBUG)
     uvloop.install()
     config = Config()
     config.bind = ["0.0.0.0:12304"]

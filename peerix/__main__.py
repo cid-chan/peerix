@@ -9,7 +9,7 @@ from peerix.app import app
 
 
 def run():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig()
     uvloop.install()
     config = Config()
     config.bind = ["0.0.0.0:12304"]

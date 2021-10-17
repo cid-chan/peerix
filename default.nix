@@ -16,4 +16,8 @@ mach-nix.buildPythonApplication {
   src = lib.cleanSource ./.;
   version = builtins.readFile ./VERSION;
   requirements = builtins.readFile ./requirements.txt;
+  buildInputs = with pkgs; [
+    nix
+    nix-serve
+  ];
 }

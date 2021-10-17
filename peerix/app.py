@@ -50,6 +50,10 @@ async def narinfo(req: Request) -> Response:
     if ni is None:
         return Response(content="Not found", status_code=404)
 
+
+    print(f"=== REMOTE {req.path_params['hash']} ===")
+    print(ni.dump())
+    print(f"=== REMOTE END ===")
     return Response(content=ni.dump(), status_code=200, media_type="text/x-nix-narinfo")
 
 @app.route("/local/{hash:str}.narinfo")
@@ -58,6 +62,9 @@ async def access_narinfo(req: Request) -> Response:
     if ni is None:
         return Response(content="Not found", status_code=404)
 
+    print(f"=== LOCAL {req.path_params['hash']} ===")
+    print(ni.dump())
+    print(f"=== LOCAL END ===")
     return Response(content=ni.dump(), status_code=200, media_type="text/x-nix-narinfo")
 
 

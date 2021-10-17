@@ -25,9 +25,7 @@ class NarInfo(t.NamedTuple):
             lines.append(f"Deriver: {self.deriver} ")
         for sig in self.signatures:
             lines.append(f"Sig: {sig}")
-
         lines.append("\n")
-
         return "\n".join(lines)
 
     @classmethod

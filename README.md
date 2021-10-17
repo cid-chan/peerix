@@ -18,16 +18,14 @@ to automatically use peernix.
 
 These Options exist:
 
-+----------------------------------+----------------------------------------------------------------------------------------------+
 | Option                           | Description                                                                                  |
-+----------------------------------+----------------------------------------------------------------------------------------------+
+|----------------------------------|----------------------------------------------------------------------------------------------|
 | `services.peerix.enable`         | Enables Peerix                                                                               |
 | `services.peerix.openFirewall`   | Open the neccessary firewall ports.                                                          |
 | `services.peerix.user`           | What user should the peerix service run under.                                               |
 | `services.peerix.group`          | What group should the peerix service run under.                                              |
 | `services.peerix.privateKeyFile` | A path to the file that contains the path to the private key to sign your derivations.       |
 | `services.peerix.publicKeyFile`  | A path to the file that contains the path to the public key so nix can verify the signature. |
-+----------------------------------+----------------------------------------------------------------------------------------------+
 
 To sign the peerix cache, you can use `nix-store --generate-binary-cache-key` to create keys to verify authenticity of
 the packages in each nix-store.

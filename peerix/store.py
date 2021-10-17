@@ -26,6 +26,8 @@ class NarInfo(t.NamedTuple):
         for sig in self.signatures:
             lines.append(f"Sig: {sig}")
 
+        lines.append("\n")
+
         return "\n".join(lines)
 
     @classmethod
@@ -75,7 +77,7 @@ class CacheInfo(t.NamedTuple):
             f"StoreDir: {self.storeDir}",
             f"WantMassQuery: {self.wantMassQuery}",
             f"Priority: {self.priority}"
-        ))
+        )) + "\n"
 
 
 class Store:

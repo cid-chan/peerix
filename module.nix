@@ -100,7 +100,7 @@ in
 
           (lib.mkIf (cfg.privateKeyFile != null) [
             (toString cfg.privateKeyFile)
-          ]);
+          ])
         ];
         ExecPaths = [
           "/nix/store"

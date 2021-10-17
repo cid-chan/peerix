@@ -61,9 +61,11 @@ class LocalStore(Store):
             if resp.status == 404:
                 return None
             info = NarInfo.parse(await resp.text())
-        return info._replace(url=base64.b64encode(info.storePath.encode("utf-8")).replace(b"/", b"_").decode("ascii"))
+        return info._replace(url=base64.b64encode(info.storePath.encode("utf-8")).replace(b"/", b"_").decode("ascii")+".nar")
 
     async def nar(self, sp: str) -> t.AsyncIterable[bytes]:
+        if sp.endswith(".nar"):
+            sp = sp[:-4]
         path = base64.b64decode(sp.replace("_", "/")).decode("utf-8")
         if not path.startswith((await self.cache_info()).storeDir):
             raise FileNotFoundError()

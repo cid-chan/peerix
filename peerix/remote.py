@@ -41,13 +41,15 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
     store: Store
     session: aiohttp.ClientSession
     local_port: int
+    prefix: str
 
-    def __init__(self, store: Store, session: aiohttp.ClientSession, local_port: int):
+    def __init__(self, store: Store, session: aiohttp.ClientSession, local_port: int, prefix: str):
         self.idx = 0
         self.waiters = {}
         self.store = store
         self.session = session
         self.local_port = local_port
+        self.prefix = prefix
 
     def connection_made(self, transport):
         self.transport = transport
@@ -82,7 +84,15 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         if narinfo is None:
             return
 
-        self.transport.sendto(b"\x01" + data[1:5] + self.local_port.to_bytes(4, "big") + narinfo.url.encode("utf-8"), addr)
+        self.transport.sendto(b"".join([
+            b"\x01",
+            data[1:5],
+            self.local_port.to_bytes(4, "big"),
+            self.prefix.encode("utf-8"),
+            b"/",
+            hsh.encode("utf-8"),
+            b".narinfo"
+        ]), addr)
 
     async def narinfo(self, hsh: str) -> t.Optional[NarInfo]:
         fut = asyncio.get_running_loop().create_future()
@@ -120,11 +130,11 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
 
 
 @contextlib.asynccontextmanager
-async def remote(store: Store, local_port: int, local_addr: str="0.0.0.0"):
+async def remote(store: Store, local_port: int, local_addr: str="0.0.0.0", prefix: str="local"):
     protocol: DiscoveryProtocol
     async with aiohttp.ClientSession() as session:
         _, protocol = await asyncio.get_running_loop().create_datagram_endpoint(
-            lambda: DiscoveryProtocol(store, session, local_port),
+            lambda: DiscoveryProtocol(store, session, local_port, prefix),
             local_addr=(local_addr, local_port),
             family=socket.AF_INET,
             allow_broadcast=True

@@ -53,7 +53,6 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         self.transport = transport
 
     def datagram_received(self, data: bytes, addr: t.Tuple[str, int]) -> None:
-        print(set(get_myself()))
         if addr[0] in set(get_myself()):
             print(f"Ignoring packet from {addr[0]}")
             return

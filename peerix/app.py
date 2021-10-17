@@ -16,8 +16,7 @@ async def _setup_stores(local_port: int):
     global l_access, r_access
     async with local() as l:
         l_access = PrefixStore("local/nar", l)
-        lp = PrefixStore("local", l)
-        async with remote(lp, local_port, "0.0.0.0") as r:
+        async with remote(l_access, local_port, "0.0.0.0") as r:
             r_access = PrefixStore("remote", r)
             yield
 setup_store = _setup_stores(12304)

@@ -61,49 +61,49 @@ in
         User = cfg.user;
         Group = cfg.group;
 
-        # PrivateMounts = true;
-        # PrivateDevices = true;
-        # PrivateTmp = true;
-        # PrivateIPC = true;
-        # PrivateUsers = true;
+        PrivateMounts = true;
+        PrivateDevices = true;
+        PrivateTmp = true;
+        PrivateIPC = true;
+        PrivateUsers = true;
 
-        # SystemCallFilters = [
-        #   "@aio"
-        #   "@basic-io"
-        #   "@file-system"
-        #   "@io-event"
-        #   "@process"
-        #   "@network-io"
-        #   "@timer"
-        #   "@signal"
-        #   "@alarm"
-        # ];
-        # SystemCallErrorNumber = "EPERM";
+        SystemCallFilters = [
+          "@aio"
+          "@basic-io"
+          "@file-system"
+          "@io-event"
+          "@process"
+          "@network-io"
+          "@timer"
+          "@signal"
+          "@alarm"
+        ];
+        SystemCallErrorNumber = "EPERM";
 
-        # ProtectSystem = "full";
-        # ProtectHome = true;
-        # ProtectHostname = true;
-        # ProtectClock = true;
-        # ProtectKernelTunables = true;
-        # ProtectKernelModules = true;
-        # ProtectKernelLogs = true;
-        # ProtectControlGroups = true;
-        # RestrictNamespaces = "";
+        ProtectSystem = "full";
+        ProtectHome = true;
+        ProtectHostname = true;
+        ProtectClock = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectKernelLogs = true;
+        ProtectControlGroups = true;
+        RestrictNamespaces = "";
 
-        # NoNewPrivileges = true;
-        # ReadOnlyPaths = lib.mkMerge [
-        #   ([
-        #     "/nix/var"
-        #     "/nix/store"
-        #   ])
+        NoNewPrivileges = true;
+        ReadOnlyPaths = lib.mkMerge [
+          ([
+            "/nix/var"
+            "/nix/store"
+          ])
 
-        #   (lib.mkIf (cfg.privateKeyFile != null) [
-        #     (toString cfg.privateKeyFile)
-        #   ])
-        # ];
-        # ExecPaths = [
-        #   "/nix/store"
-        # ];
+          (lib.mkIf (cfg.privateKeyFile != null) [
+            (toString cfg.privateKeyFile)
+          ])
+        ];
+        ExecPaths = [
+          "/nix/store"
+        ];
         Environment = lib.mkIf (cfg.privateKeyFile != null) [
           "NIX_SECRET_KEY_FILE=${toString cfg.privateKeyFile}"
         ];

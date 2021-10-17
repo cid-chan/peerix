@@ -92,7 +92,7 @@ in
         RestrictNamespaces = "";
 
         NoNewPrivileges = true;
-        ReadOnlyPaths = lib,mkMerge [
+        ReadOnlyPaths = lib.mkMerge [
           ([
             "/nix/var"
             "/nix/store"

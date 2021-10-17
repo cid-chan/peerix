@@ -68,4 +68,4 @@ async def push_nar(req: Request) -> Response:
 
 @app.route("/remote/{path:path}")
 async def pull_nar(req: Request) -> Response:
-    return StreamingResponse(l_access.nar(f"remote/{req.path_params['path']}"), media_type="text/plain")
+    return StreamingResponse(r_access.nar(f"remote/{req.path_params['path']}"), media_type="text/plain")

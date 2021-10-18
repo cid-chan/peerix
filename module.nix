@@ -61,7 +61,7 @@ in
 
           By default not given, as it affects the UX of the nix installation.
         '';
-      }
+      };
     };
   };
 

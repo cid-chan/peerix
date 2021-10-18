@@ -67,6 +67,7 @@ in
 
   config = lib.mkIf (cfg.enable) {
     systemd.services.peerix = {
+      enable = true;
       description = "Local p2p nix caching daemon";
       wantedBy = ["multi-user.target"];
       serviceConfig = {

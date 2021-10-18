@@ -136,7 +136,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
             logging.warn(f"Remote({addr1}:{addr2})-store path is dead: {sp}")
             pass
 
-        _, _, hsh, _ = sp.split("/", 2)
+        _, _, hsh, _ = sp.split("/", 3)
         narinfo = await self.narinfo(hsh)
         if narinfo is None:
             logging.warn(f"All sources are gone.")
@@ -145,7 +145,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         return await self._nar_req(narinfo.url)
 
     async def _nar_req(self, url: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
-        addr1, addr2, _, p = url.split("/", 2)
+        addr1, addr2, _, p = url.split("/", 3)
         resp = await self.session.get(f"http://{addr1}:{addr2}/{p}")
         if resp.status == 200:
             return self._nar_direct(resp)

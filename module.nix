@@ -136,8 +136,8 @@ in
       ];
 
       extraOptions = lib.mkIf (cfg.globalCacheTTL != null) ''
-        narinfo-cache-negative-ttl ${toString cfg.globalCacheTTL}
-        narinfo-cache-positive-ttl ${toString cfg.globalCacheTTL}
+        narinfo-cache-negative-ttl=${toString cfg.globalCacheTTL}
+        narinfo-cache-positive-ttl=${toString cfg.globalCacheTTL}
       '';
     };
 

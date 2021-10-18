@@ -126,17 +126,41 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
                 return
             info = NarInfo.parse(await resp.text())
 
-        return info._replace(url = f"{addr[0]}/{port}/{info.url}")
+        return info._replace(url = f"{addr[0]}/{port}/{hsh}/{info.url}")
 
-    async def nar(self, sp: str) -> t.AsyncIterable[bytes]:
-        addr1, addr2, p = sp.split("/", 2)
-        async with self.session.get(f"http://{addr1}:{addr2}/{p}") as resp:
-            if resp.status != 200:
-                raise FileNotFoundError("Not found.")
+    async def nar(self, sp: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
+        try:
+            return await self._nar_req(sp)
+        except FileNotFoundError:
+            addr1, addr2, hsh, _ = sp.split("/", 2)
+            logging.warn(f"Remote({addr1}:{addr2})-store path is dead: {sp}")
+            pass
+
+        _, _, hsh, _ = sp.split("/", 2)
+        narinfo = await self.narinfo(hsh)
+        if narinfo is None:
+            logging.warn(f"All sources are gone.")
+            raise FileNotFoundError()
+
+        return await self._nar_req(narinfo.url)
+
+    async def _nar_req(self, url: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
+        addr1, addr2, _, p = url.split("/", 2)
+        resp = await self.session.get(f"http://{addr1}:{addr2}/{p}")
+        if resp.status == 200:
+            return self._nar_direct(resp)
+        else:
+            raise FileNotFoundError()
+
+
+    async def _nar_direct(self, resp: aiohttp.ClientResponse) -> t.AsyncIterable[bytes]:
+        try:
             content = resp.content
             while not content.at_eof():
                 yield await content.readany()
-
+        finally:
+            resp.close()
+            await resp.wait_for_close()
 
 
 @contextlib.asynccontextmanager

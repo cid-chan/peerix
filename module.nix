@@ -48,6 +48,20 @@ in
           The user the service will use.
         '';
       };
+
+      globalCacheTTL = lib.mkOption {
+        type = types.nullOr types.int;
+        default = null;
+        description = ''
+          How long should nix store narinfo files.
+
+          If not defined, the module will not reconfigure the entry.
+          If it is defined, this will define how many seconds a cache entry will
+          be stored.
+
+          By default not given, as it affects the UX of the nix installation.
+        '';
+      }
     };
   };
 
@@ -120,6 +134,11 @@ in
       binaryCachePublicKeys = lib.mkIf (cfg.publicKeyFile != null) [
         (builtins.readFile cfg.publicKeyFile)
       ];
+
+      extraOptions = lib.mkIf (cfg.globalCacheTTL != null) ''
+        narinfo-cache-negative-ttl ${cfg.globalCacheTTL}
+        narinfo-cache-positive-ttl ${cfg.globalCacheTTL}
+      '';
     };
 
     networking.firewall = lib.mkIf (cfg.openFirewall) {

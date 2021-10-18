@@ -86,6 +86,6 @@ class Store:
     async def narinfo(self, hsh: str) -> t.Optional[NarInfo]:
         raise NotImplementedError()
 
-    async def nar(self, url: str) -> t.AsyncIterable[bytes]:
+    def nar(self, url: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
         raise NotImplementedError()
         

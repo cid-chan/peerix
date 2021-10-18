@@ -67,13 +67,20 @@ class LocalStore(Store):
             info = NarInfo.parse(await resp.text())
         return info._replace(url=base64.b64encode(info.storePath.encode("utf-8")).replace(b"/", b"_").decode("ascii")+".nar")
 
-    async def nar(self, sp: str) -> t.AsyncIterable[bytes]:
+    async def nar(self, sp: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
         if sp.endswith(".nar"):
             sp = sp[:-4]
         path = base64.b64decode(sp.replace("_", "/")).decode("utf-8")
         if not path.startswith((await self.cache_info()).storeDir):
             raise FileNotFoundError()
 
+        if not os.path.exists(path):
+            raise FileNotFoundError()
+
+        return self._nar_pull(path)
+
+    async def _nar_pull(self, path: str) -> t.AsyncIterable[bytes]:
+        logger.info(f"Serving {path}")
         process = await asyncio.create_subprocess_exec(
                 nix, "dump-path", "--", path,
                 stdout=subprocess.PIPE,
@@ -85,11 +92,19 @@ class LocalStore(Store):
         while not process.stdout.at_eof():
             yield await process.stdout.read(10*1024*1024)
 
+        logger.debug(f"Served {path}")
+        try:
+            process.terminate()
+        except ProcessLookupError:
+            pass
+
 
 @contextlib.asynccontextmanager
 async def local():
     with tempfile.TemporaryDirectory() as tmpdir:
         sock = f"{tmpdir}/server.sock"
+
+        logger.info("Launching nix-serve.")
         process = await asyncio.create_subprocess_exec(
             nix_serve, "--listen", sock,
             stdin=subprocess.DEVNULL,
@@ -108,5 +123,10 @@ async def local():
             async with aiohttp.ClientSession(connector_owner=True, connector=connector) as session:
                 yield LocalStore(session)
         finally:
-            process.terminate()
+            try:
+                process.terminate()
+            except ProcessLookupError:
+                pass
+
+            logger.info("nix-serve exited.")
 

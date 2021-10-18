@@ -16,10 +16,9 @@ class PrefixStore(Store):
             return None
         return info._replace(url=f"{self.prefix}/{info.url}")
 
-    async def nar(self, path: str) -> t.AsyncIterable[bytes]:
+    def nar(self, path: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
         if not path.startswith(self.prefix + "/"):
             raise FileNotFoundError("Not found.")
 
-        async for chunk in self.backend.nar(path[len(self.prefix)+1:]):
-            yield chunk
+        return self.backend.nar(path[len(self.prefix)+1:])
 

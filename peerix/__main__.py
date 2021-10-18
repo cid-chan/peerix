@@ -17,7 +17,8 @@ parser.add_argument("--private-key", required=False)
 
 def run():
     args = parser.parse_args()
-    os.environ["NIX_SECRET_KEY_FILE"] = os.path.abspath(os.path.expanduser(args.private_key))
+    if args.private_key is not None:
+        os.environ["NIX_SECRET_KEY_FILE"] = os.path.abspath(os.path.expanduser(args.private_key))
 
     logging.basicConfig(level=args.loglevel)
     uvloop.install()

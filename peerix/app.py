@@ -70,6 +70,6 @@ async def push_nar(req: Request) -> Response:
 @app.route("/v2/remote/{path:path}")
 async def pull_nar(req: Request) -> Response:
     try:
-        return StreamingResponse(await r_access.nar(f"remote/{req.path_params['path']}"), media_type="text/plain")
+        return StreamingResponse(await r_access.nar(f"v2/remote/{req.path_params['path']}"), media_type="text/plain")
     except FileNotFoundError:
         return Response(content="Gone", status_code=404)

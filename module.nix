@@ -21,7 +21,7 @@ in
         type = types.nullOr types.path;
         default = null;
         description = ''
-          The private key to sign the derivations with.
+          File containing the private key to sign the derivations with.
         '';
       }; 
 
@@ -29,7 +29,15 @@ in
         type = types.nullOr types.path;
         default = null;
         description = ''
-          The private key to sign the derivations with.
+          File containing the public key to sign the derivations with.
+        '';
+      };
+
+      publicKey = lib.mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = ''
+          The public key to sign the derivations with.
         '';
       };
 
@@ -132,9 +140,10 @@ in
       binaryCaches = [
         "http://127.0.0.1:12304/"
       ];
-      binaryCachePublicKeys = lib.mkIf (cfg.publicKeyFile != null) [
-        (builtins.readFile cfg.publicKeyFile)
-      ];
+      binaryCachePublicKeys = [
+        lib.mkIf (cfg.publicKeyFile != null) (builtins.readFile cfg.publicKeyFile)
+        lib.mkIf (cfg.publicKey != null) cfg.publicKey
+      ]; 
 
       extraOptions = lib.mkIf (cfg.globalCacheTTL != null) ''
         narinfo-cache-negative-ttl = ${toString cfg.globalCacheTTL}

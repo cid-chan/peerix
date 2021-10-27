@@ -26,6 +26,7 @@ These Options exist:
 | `services.peerix.group`          | What group should the peerix service run under.                                              |
 | `services.peerix.privateKeyFile` | A path to the file that contains the path to the private key to sign your derivations.       |
 | `services.peerix.publicKeyFile`  | A path to the file that contains the path to the public key so nix can verify the signature. |
+| `services.peerix.publicKey`      | Directly specifiy a public key for the binary caches.                                        |
 
 To sign the peerix cache, you can use `nix-store --generate-binary-cache-key` to create keys to verify authenticity of
 the packages in each nix-store.

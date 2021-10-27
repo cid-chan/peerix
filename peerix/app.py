@@ -13,12 +13,12 @@ from peerix.prefix import PrefixStore
 
 
 @contextlib.asynccontextmanager
-async def setup_stores(local_port: int):
+async def setup_stores(local_port: int, timeout: float):
     global l_access, r_access
     async with local() as l:
         l_access = PrefixStore("local/nar", l)
         lp = PrefixStore("local", l)
-        async with remote(lp, local_port, "0.0.0.0", lp.prefix) as r:
+        async with remote(lp, local_port, "0.0.0.0", lp.prefix, timeout) as r:
             r_access = PrefixStore("v2/remote", r)
             yield
 

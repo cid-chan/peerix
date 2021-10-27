@@ -47,14 +47,16 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
     session: aiohttp.ClientSession
     local_port: int
     prefix: str
+    timeout: float
 
-    def __init__(self, store: Store, session: aiohttp.ClientSession, local_port: int, prefix: str):
+    def __init__(self, store: Store, session: aiohttp.ClientSession, local_port: int, prefix: str, timeout: float):
         self.idx = 0
         self.waiters = {}
         self.store = store
         self.session = session
         self.local_port = local_port
         self.prefix = prefix
+        self.timeout = timeout
 
     def connection_made(self, transport):
         self.transport = transport
@@ -114,7 +116,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         try:
             # This must have a short timeout so it does not noticably slow down
             # querying of other caches.
-            port, url, addr = await asyncio.wait_for(fut, 0.05)
+            port, url, addr = await asyncio.wait_for(fut, self.timeout)
         except asyncio.TimeoutError:
             logging.debug(f"No response for {hsh}")
             return None
@@ -164,11 +166,11 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
 
 
 @contextlib.asynccontextmanager
-async def remote(store: Store, local_port: int, local_addr: str="0.0.0.0", prefix: str="local"):
+async def remote(store: Store, local_port: int, local_addr: str="0.0.0.0", prefix: str="local", timeout: float = 0.05):
     protocol: DiscoveryProtocol
     async with aiohttp.ClientSession() as session:
         _, protocol = await asyncio.get_running_loop().create_datagram_endpoint(
-            lambda: DiscoveryProtocol(store, session, local_port, prefix),
+            lambda: DiscoveryProtocol(store, session, local_port, prefix, timeout),
             local_addr=(local_addr, local_port),
             family=socket.AF_INET,
             allow_broadcast=True

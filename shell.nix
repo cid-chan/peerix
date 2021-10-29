@@ -1,19 +1,9 @@
-let
-  sources = import ./nix/sources.nix {};
-in
-{ pkgs ? import sources.nixpkgs {} }:
-let
-  mach-nix = import sources.mach-nix {
-    inherit pkgs;
-  };
-in
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    nix-serve
-    niv
-    (mach-nix.mkPython {
-      python = "python39";
-      requirements = (builtins.readFile ./requirements.txt) + "\nipython";
-    })
-  ];
-}
+(import (
+  let
+    lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+  in fetchTarball {
+    url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+    sha256 = lock.nodes.flake-compat.locked.narHash; }
+) {
+  src =  ./.;
+}).shellNix

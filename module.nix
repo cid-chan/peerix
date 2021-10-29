@@ -2,7 +2,7 @@
 let
   cfg = config.services.peerix;
 
-  peerix = pkgs.callPackage ./default.nix {};
+  peerix = import ./default.nix;
 in
 {
   options = with lib; {
@@ -121,14 +121,14 @@ in
           ])
 
           (lib.mkIf (cfg.privateKeyFile != null) [
-            (toString cfg.privateKeyFile)
+            cfg.privateKeyFile
           ])
         ];
         ExecPaths = [
           "/nix/store"
         ];
         Environment = lib.mkIf (cfg.privateKeyFile != null) [
-          "NIX_SECRET_KEY_FILE=${toString cfg.privateKeyFile}"
+          "NIX_SECRET_KEY_FILE=${cfg.privateKeyFile}"
         ];
       };
       script = ''
@@ -141,8 +141,8 @@ in
         "http://127.0.0.1:12304/"
       ];
       binaryCachePublicKeys = [
-        lib.mkIf (cfg.publicKeyFile != null) (builtins.readFile cfg.publicKeyFile)
-        lib.mkIf (cfg.publicKey != null) cfg.publicKey
+        (lib.mkIf (cfg.publicKeyFile != null) (builtins.readFile cfg.publicKeyFile))
+        (lib.mkIf (cfg.publicKey != null) cfg.publicKey)
       ]; 
 
       extraOptions = lib.mkIf (cfg.globalCacheTTL != null) ''

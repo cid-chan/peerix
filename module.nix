@@ -2,7 +2,7 @@
 let
   cfg = config.services.peerix;
 
-  peerix = import ./default.nix;
+  peerix = (import ./default.nix).default;
 in
 {
   options = with lib; {

@@ -32,7 +32,7 @@ in
       };
 
       publicKey = lib.mkOption {
-        type = types.nullOr types.path;
+        type = types.nullOr types.str;
         default = null;
         description = ''
           The public key to sign the derivations with.

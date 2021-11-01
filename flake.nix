@@ -17,7 +17,7 @@
   } // flake-utils.lib.eachDefaultSystem (system:
     let pkgs = nixpkgs.legacyPackages.${system}; in {
     packages.peerix = mach-nix.lib.${system}.buildPythonApplication {
-      name = "peerix";
+      pname = "peerix";
       python = "python39";
       src = ./.;
       version = builtins.readFile ./VERSION;

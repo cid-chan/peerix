@@ -1,8 +1,6 @@
 { lib, config, pkgs, ... }:
 let
   cfg = config.services.peerix;
-
-  peerix = (import ./default.nix).default;
 in
 {
   options = with lib; {
@@ -70,6 +68,13 @@ in
           By default not given, as it affects the UX of the nix installation.
         '';
       };
+
+      package = mkOption {
+        type = types.package;
+        default = (import ./default.nix).default or pkgs.peerix;
+        defaultText = literalExpression "pkgs.peerix";
+        description = "The package to use for peerix";
+      };
     };
   };
 
@@ -132,7 +137,7 @@ in
         ];
       };
       script = ''
-        exec ${peerix}/bin/peerix
+        exec ${cfg.package}/bin/peerix
       '';
     };
 

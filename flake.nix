@@ -13,6 +13,7 @@
 
   outputs = { self, nixpkgs, flake-utils, mach-nix, ... }: {
     nixosModules.peerix = import ./module.nix;
+    overlay = import ./overlay.nix { inherit self; };
   } // flake-utils.lib.eachDefaultSystem (system:
     let pkgs = nixpkgs.legacyPackages.${system}; in {
     packages.peerix = mach-nix.lib.${system}.buildPythonApplication {

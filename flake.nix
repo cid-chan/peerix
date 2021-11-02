@@ -20,7 +20,7 @@
       pname = "peerix";
       python = "python39";
       src = ./.;
-      version = builtins.readFile ./VERSION;
+      version = builtins.replaceStrings [ " " "\n" ] [ "" "" ] (builtins.readFile ./VERSION);
       requirements = builtins.readFile ./requirements.txt;
       propagatedBuildInputs = with pkgs; [
         nix

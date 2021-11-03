@@ -8,42 +8,47 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    mach-nix.url = "github:DavHau/mach-nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, mach-nix, ... }: {
+  outputs = { self, nixpkgs, flake-utils, ... }: {
     nixosModules.peerix = import ./module.nix;
     overlay = import ./overlay.nix { inherit self; };
   } // flake-utils.lib.eachDefaultSystem (system:
-    let pkgs = nixpkgs.legacyPackages.${system}; in {
-    packages.peerix = mach-nix.lib.${system}.buildPythonApplication {
-      pname = "peerix";
-      python = "python39";
-      src = ./.;
-      version = builtins.replaceStrings [ " " "\n" ] [ "" "" ] (builtins.readFile ./VERSION);
-      requirements = builtins.readFile ./requirements.txt;
-      propagatedBuildInputs = with pkgs; [
-        nix
-        nix-serve
-      ];
-    };
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      python = pkgs.python39;
+      packages = map (pkg: python.pkgs.${pkg}) (builtins.filter (v: builtins.isString v && (builtins.stringLength v) > 0) (builtins.split "\n" (builtins.readFile ./requirements.txt)));
+    in {
+      packages = rec {
+        peerix-unwrapped = python.pkgs.buildPythonApplication {
+          pname = "peerix";
+          version = builtins.replaceStrings [ " " "\n" ] [ "" "" ] (builtins.readFile ./VERSION);
+          src = ./.;
 
-    defaultPackage = self.packages.${system}.peerix;
+          doCheck = false;
+    
+          propagatedBuildInputs = with pkgs; [
+            nix
+            nix-serve
+          ] ++ packages;
+        };
 
-    devShell = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        nix-serve
-        niv
-        (mach-nix.lib.${system}.mkPython {
-          python = "python39";
-          requirements = ''
-            ${builtins.readFile ./requirements.txt}
-            ipython
-          '';
-        })
-      ];
-    };
+        peerix = pkgs.writeShellScriptBin "peerix" ''
+          PATH=${pkgs.nix}/bin:${pkgs.nix-serve}:$PATH
+          exec ${peerix-unwrapped}/bin/peerix "$@"
+        '';
+      };
 
-    defaultApp = { type = "app"; program = "${self.packages.${system}.peerix}/bin/peerix"; };
-  });
+      defaultPackage = self.packages.${system}.peerix;
+
+      devShell = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          nix-serve
+          niv
+          (python.withPackages (ps: packages))
+        ];
+      };
+
+      defaultApp = { type = "app"; program = "${self.packages.${system}.peerix}/bin/peerix"; };
+    });
 }

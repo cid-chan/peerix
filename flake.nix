@@ -8,7 +8,13 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    mach-nix.url = "github:DavHau/mach-nix";
+    mach-nix = {
+      url = "github:DavHau/mach-nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
   outputs = { self, nixpkgs, flake-utils, mach-nix, ... }: {

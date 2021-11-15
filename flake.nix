@@ -2,13 +2,13 @@
   description = "Peer2Peer Nix-Binary-Cache";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    mach-nix.url = "github:DavHau/mach-nix";
+    mach-nix.url = "mach-nix";
   };
 
   outputs = { self, nixpkgs, flake-utils, mach-nix, ... }: {

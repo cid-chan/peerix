@@ -22,7 +22,7 @@ class NarInfo(t.NamedTuple):
         if self.references:
             lines.append(f"References: {' '.join(self.references)}")
         if self.deriver:
-            lines.append(f"Deriver: {self.deriver} ")
+            lines.append(f"Deriver: {self.deriver}")
         for sig in self.signatures:
             lines.append(f"Sig: {sig}")
         lines.append("")

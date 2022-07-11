@@ -133,8 +133,8 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
     async def nar(self, sp: str) -> t.Awaitable[t.AsyncIterable[bytes]]:
         try:
             return await self._nar_req(sp)
-        except FileNotFoundError:
-            addr1, addr2, hsh, _ = sp.split("/", 2)
+        except (FileNotFoundError, aiohttp.ServerTimeoutError):
+            addr1, addr2, hsh = sp.split("/", 2)
             logging.warn(f"Remote({addr1}:{addr2})-store path is dead: {sp}")
             pass
 
@@ -168,7 +168,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
 @contextlib.asynccontextmanager
 async def remote(store: Store, local_port: int, local_addr: str="0.0.0.0", prefix: str="local", timeout: float = 0.05):
     protocol: DiscoveryProtocol
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(sock_connect=timeout)) as session:
         _, protocol = await asyncio.get_running_loop().create_datagram_endpoint(
             lambda: DiscoveryProtocol(store, session, local_port, prefix, timeout),
             local_addr=(local_addr, local_port),

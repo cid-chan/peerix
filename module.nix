@@ -1,9 +1,19 @@
 { lib, config, pkgs, ... }:
+
+with lib;
+
 let
   cfg = config.services.peerix;
-in
-{
-  options = with lib; {
+
+  removedUser = "From now on, Peerix will always run under its own user and group. You should remove the user which you have configured yourself.";
+
+in {
+  imports = [
+    (mkRemovedOptionModule ["services" "peerix" "user"] removedUser)
+    (mkRemovedOptionModule ["services" "peerix" "group"] removedUser)
+  ];
+
+  options = {
     services.peerix = {
       enable = lib.mkEnableOption "peerix";
 
@@ -39,22 +49,6 @@ in
         '';
       };
 
-      user = lib.mkOption {
-        type = with types; oneOf [ str int ];
-        default = "nobody";
-        description = ''
-          The user the service will use.
-        '';
-      };
-
-      group = lib.mkOption {
-        type = with types; oneOf [ str int ];
-        default = "nobody";
-        description = ''
-          The user the service will use.
-        '';
-      };
-
       globalCacheTTL = lib.mkOption {
         type = types.nullOr types.int;
         default = null;
@@ -86,8 +80,8 @@ in
       serviceConfig = {
         Type = "simple";
 
-        User = cfg.user;
-        Group = cfg.group;
+        User = "peerix";
+        Group = "peerix";
 
         PrivateMounts = true;
         PrivateDevices = true;
@@ -140,6 +134,13 @@ in
         exec ${cfg.package}/bin/peerix
       '';
     };
+
+    users.users.peerix = {
+      description = config.systemd.services.peerix.description;
+      isSystemUser = true;
+      group = "peerix";
+    };
+    users.groups.peerix = {};
 
     nix = {
       settings = {

@@ -95,7 +95,7 @@ in
         PrivateIPC = true;
         PrivateUsers = true;
 
-        SystemCallFilter = [
+        SystemCallFilter = toString [
           "@aio"
           "@basic-io"
           "@file-system"

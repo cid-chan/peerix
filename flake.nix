@@ -26,7 +26,7 @@
           src = ./.;
 
           doCheck = false;
-    
+
           propagatedBuildInputs = with pkgs; [
             nix
             nix-serve
@@ -44,7 +44,6 @@
       devShell = pkgs.mkShell {
         buildInputs = with pkgs; [
           nix-serve
-          niv
           (python.withPackages (ps: packages))
         ];
       };

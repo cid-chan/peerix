@@ -1,5 +1,6 @@
 import typing as t
 
+import os
 import socket
 import logging
 import asyncio
@@ -109,7 +110,16 @@ class DiscoveryProtocol(asyncio.DatagramProtocol, Store):
         self.waiters[idx] = fut
         fut.add_done_callback(lambda _: self.waiters.pop(idx, None))
         logging.info(f"Requesting {hsh} from direct local network.")
-        for addr in set(get_brdcasts()):
+
+        addresses = set([]) if os.environ["PEERIX_DISABLE_BROADCAST"] == "true" else set(get_brdcasts())
+        for addr_raw in os.environ["PEERIX_EXTRA_HOSTS"].split(","):
+            try:
+                addr = socket.gethostbyname(addr_raw)
+                addresses.update([str(ipaddress.ip_address(addr))])
+            except:
+                pass
+
+        for addr in addresses:
             logging.debug(f"Sending request for {hsh} to {addr}:{self.local_port}")
             self.transport.sendto(b"".join([b"\x00", idx.to_bytes(4, "big"), hsh.encode("utf-8")]), (addr, self.local_port))
 

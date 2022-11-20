@@ -39,6 +39,22 @@ in
         '';
       };
 
+      extraHosts = lib.mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          List of IPs of extra hosts to contact, wihtout using broadcast discovery.
+        '';
+      };
+
+      disableBroadcast = lib.mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Disable the use of broadcast to find other nodes automatically on the network.
+        '';
+      };
+
       user = lib.mkOption {
         type = with types; oneOf [ str int ];
         default = "nobody";
@@ -79,10 +95,10 @@ in
   };
 
   config = lib.mkIf (cfg.enable) {
-    systemd.services.peerix = {
+    systemd.services.peerix = let toto = if cfg.disableBroadcast then "true" else "false"; in {
       enable = true;
       description = "Local p2p nix caching daemon";
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "simple";
 
@@ -132,8 +148,15 @@ in
         ExecPaths = [
           "/nix/store"
         ];
-        Environment = lib.mkIf (cfg.privateKeyFile != null) [
-          "NIX_SECRET_KEY_FILE=${cfg.privateKeyFile}"
+        Environment = lib.mkMerge [
+          ([
+            "PEERIX_EXTRA_HOSTS=${lib.strings.concatStringsSep "," cfg.extraHosts}"
+            "PEERIX_DISABLE_BROADCAST=${toto}"
+          ])
+
+          (lib.mkIf (cfg.privateKeyFile != null) [
+            "NIX_SECRET_KEY_FILE=${cfg.privateKeyFile}"
+          ])
         ];
       };
       script = ''
